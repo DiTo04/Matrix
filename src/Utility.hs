@@ -1,4 +1,8 @@
-module Utility (Sum, getElement, getElementOrZero, getElementOrEmpty) where
+module Utility (Sum (..), 
+                getElement,
+                getElementOrZero,
+                getElementOrEmpty
+                ) where
 
 getElement :: Int -> [a] -> Maybe a
 getElement _ [] = Nothing
@@ -21,7 +25,7 @@ nothingToEmpty :: Num a => Maybe [a] -> [a]
 nothingToEmpty (Just [a]) = [a]
 nothingToEmpty (Nothing) = [] :: [a]
 
-newtype Sum n = Sum n
+newtype Sum n = Sum n deriving (Show, Read)
 
 instance Num n => Monoid (Sum n) where
     mempty = Sum 0

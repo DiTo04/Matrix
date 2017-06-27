@@ -17,7 +17,7 @@ module Numeric.Matrix (
   toRationalMatrix -}
 ) where
 
-import Prelude hiding ( map)
+import Prelude hiding (foldMap, map)
 import qualified Prelude as P
 import Utility
 
@@ -69,60 +69,68 @@ scale i = map (i *)
 
 class (Num e, Eq e) => MatrixElement e where
   matrix :: (Int, Int) -> ((Int, Int) -> e) -> Matrix e
+
   select :: ((Int, Int) -> Bool) -> Matrix e -> [e]
+  select p m = [ m `at` (i,j) | i <- [1..numRows m]
+                            , j <- [1..numCols m]
+                            , p (i,j)]
+
   at :: Matrix e -> (Int, Int) -> e
+  at mat (i, j) = ((getElementOrZero j) . (getElementOrEmpty i) . toList) mat
+  
   row :: Int -> Matrix e -> [e]
+  row i = (getElementOrEmpty (i-1)) . toList
+  
   col :: Int -> Matrix e -> [e]
+  col i = row i . transpose
+  
   dimensions :: Matrix e -> (Int, Int)
+  dimensions m = case toList m of 
+    [] -> (0,0)
+    (x:xs) -> (length xs + 1, length x)
+
+
   numRows :: Matrix e -> Int
+  numRows = fst . dimensions
+
   numCols :: Matrix e -> Int
+  numCols = snd . dimensions
+
   fromList :: [[e]] -> Matrix e -- TODO
   toList :: Matrix e -> [[e]] -- TODO
+  
   unit :: Int -> Matrix e
+  unit n = fromList [[if i == j then 1 else 0 | i <- [1..n]] | j <- [1..n]]
+  
   zero :: Int -> Matrix e
+  zero n = matrix (n,n) (const 0)
+  
   diag :: [e] -> Matrix e
+  diag xs = matrix (n,n) (\ (i, j) -> if (i == j) then getElementOrZero (i-1) xs else 0)
+    where n = length xs
+
   empty :: Matrix e
+  empty = fromList []
+  
   minus :: Matrix e -> Matrix e -> Matrix e -- TODO
   plus :: Matrix e -> Matrix e -> Matrix e -- TODO
   times :: Matrix e -> Matrix e -> Matrix e -- TODO
   inv :: Matrix e -> Maybe (Matrix e) -- TODO
+  
   det :: Matrix e -> e -- TODO
   transpose :: Matrix e -> Matrix e
-  map :: MatrixElement f => (e -> f) -> Matrix e -> Matrix f
-  foldMap :: Monoid m => (e->m) -> Matrix e -> m
-  sum :: Matrix e -> e
-
--- Implementation.
-  unit n = fromList [[if i == j then 1 else 0 | i <- [1..n]] | j <- [1..n]]
-  zero n = matrix (n,n) (const 0)
-  empty = fromList []
-  diag xs = matrix (n,n) (\ (i, j) -> if (i == j) then getElementOrZero (i-1) xs else 0)
-    where n = length xs
-
-  select p m = [ m `at` (i,j) | i <- [1..numRows m]
-                            , j <- [1..numCols m]
-                            , p (i,j)]
-  
-  at mat (i, j) = ((getElementOrZero j) . (getElementOrEmpty i) . toList) mat
-  
-  row i = (getElementOrEmpty (i-1)) . toList
-  col i = row i . transpose
-
-  numRows = fst . dimensions
-  numCols = snd . dimensions
-
-  dimensions m = case toList m of [] -> (0,0)
-                              (x:xs) -> (length xs + 1, length x)
-
   transpose mat = matrix (m,n) (\(i,j) -> mat `at` (j,i))
     where (n,m) = dimensions mat
-
+  
+  map :: MatrixElement f => (e -> f) -> Matrix e -> Matrix f
   map f mat = matrix (dimensions mat) (\x -> f (mat `at` x))
   
-  foldMap f mat = mconcat [f (mat `at` (i,j)) | i <- (1..n), j <- (1..m)]
+  foldMap :: Monoid m => (e->m) -> Matrix e -> m
+  foldMap f mat = mconcat [f (mat `at` (i,j)) | i <- [1..n], j <- [1..m]]
     where n = numRows mat
           m = numCols mat
 
+  sum :: Matrix e -> e
   sum = (\(Sum s) -> s) . foldMap Sum
 
 main :: IO ()
