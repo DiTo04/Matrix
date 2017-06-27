@@ -19,6 +19,7 @@ module Numeric.Matrix (
 
 import Prelude hiding ( map)
 import qualified Prelude as P
+import Utility
 
 data Matrix e = Matrix (Int, Int) [[e]]
 
@@ -65,26 +66,6 @@ mtx1 <-> mtx2  = matrix (n1 + n2, max m1 m2) (\(i,j)
 scale :: MatrixElement e => e -> Matrix e -> Matrix e
 scale i = map (i *)
 
-getElement :: Int -> [a] -> Maybe a
-getElement _ [] = Nothing
-getElement 0 (x:xs) = Just x
-getElement n xs
-  | n < 0 = Nothing
-  | otherwise = getElement (n-1) (tail xs)
-
-getElementOrZero :: Num a => Int -> [a] -> a
-getElementOrZero n = nothingToZero . (getElement n)
-
-getElementOrEmpty :: Num a => Int -> [[a]] -> [a]
-getElementOrEmpty n = nothingToEmpty . (getElement n)
-
-nothingToZero :: Num a => Maybe a -> a
-nothingToZero (Just a) = a
-nothingToZero (Nothing) = 0
-
-nothingToEmpty :: Num a => Maybe [a] -> [a]
-nothingToEmpty (Just [a]) = [a]
-nothingToEmpty (Nothing) = [] :: [a]
 
 class (Num e, Eq e) => MatrixElement e where
   matrix :: (Int, Int) -> ((Int, Int) -> e) -> Matrix e
@@ -95,20 +76,21 @@ class (Num e, Eq e) => MatrixElement e where
   dimensions :: Matrix e -> (Int, Int)
   numRows :: Matrix e -> Int
   numCols :: Matrix e -> Int
-  fromList :: [[e]] -> Matrix e
-  toList :: Matrix e -> [[e]]
+  fromList :: [[e]] -> Matrix e -- TODO
+  toList :: Matrix e -> [[e]] -- TODO
   unit :: Int -> Matrix e
   zero :: Int -> Matrix e
   diag :: [e] -> Matrix e
   empty :: Matrix e
-  minus :: Matrix e -> Matrix e -> Matrix e
-  plus :: Matrix e -> Matrix e -> Matrix e
-  times :: Matrix e -> Matrix e -> Matrix e
-  inv :: Matrix e -> Maybe (Matrix e)
-  det :: Matrix e -> e
+  minus :: Matrix e -> Matrix e -> Matrix e -- TODO
+  plus :: Matrix e -> Matrix e -> Matrix e -- TODO
+  times :: Matrix e -> Matrix e -> Matrix e -- TODO
+  inv :: Matrix e -> Maybe (Matrix e) -- TODO
+  det :: Matrix e -> e -- TODO
   transpose :: Matrix e -> Matrix e
   map :: MatrixElement f => (e -> f) -> Matrix e -> Matrix f
   foldMap :: Monoid m => (e->m) -> Matrix e -> m
+  sum :: Matrix e -> e
 
 -- Implementation.
   unit n = fromList [[if i == j then 1 else 0 | i <- [1..n]] | j <- [1..n]]
@@ -120,6 +102,7 @@ class (Num e, Eq e) => MatrixElement e where
   select p m = [ m `at` (i,j) | i <- [1..numRows m]
                             , j <- [1..numCols m]
                             , p (i,j)]
+  
   at mat (i, j) = ((getElementOrZero j) . (getElementOrEmpty i) . toList) mat
   
   row i = (getElementOrEmpty (i-1)) . toList
@@ -131,6 +114,16 @@ class (Num e, Eq e) => MatrixElement e where
   dimensions m = case toList m of [] -> (0,0)
                               (x:xs) -> (length xs + 1, length x)
 
+  transpose mat = matrix (m,n) (\(i,j) -> mat `at` (j,i))
+    where (n,m) = dimensions mat
+
+  map f mat = matrix (dimensions mat) (\x -> f (mat `at` x))
+  
+  foldMap f mat = mconcat [f (mat `at` (i,j)) | i <- (1..n), j <- (1..m)]
+    where n = numRows mat
+          m = numCols mat
+
+  sum = (\(Sum s) -> s) . foldMap Sum
 
 main :: IO ()
 main = do
