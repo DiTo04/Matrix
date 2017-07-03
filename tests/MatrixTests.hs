@@ -23,11 +23,11 @@ unitTests = testGroup "Unit tests" [
   zeroTest,
   diagTest,
   emptyTest,
-  -- minusTest,
-  -- plusTest,
-  -- timesTest,
-  -- invTest,
-  -- detTest,
+  minusTest,
+  plusTest,
+  timesTest,
+ -- invTest,
+ -- detTest,
   transposeTest,
   mapTest,
   sumTest
@@ -96,6 +96,16 @@ diagTest = testCase "diagonal" $
 
 emptyTest = testCase "empty" $
   assertEqual "" ((Matrix (0,0) []) :: Matrix Int) (empty)
+
+minusTest = testCase "minus" $ assertEqual "" mat (a-b)
+  where a = fromList [[2,3],[4,5]] :: Matrix Int
+        b = fromList [[1,1],[1,1]] :: Matrix Int
+
+plusTest = testCase "plus" $ assertEqual "" mat (a+b)
+  where a = fromList [[0,1],[2,3]] :: Matrix Int
+        b = fromList [[1,1],[1,1]] :: Matrix Int
+  
+timesTest = testCase "times" $ assertEqual "" mat (mat * (unit 2))
 
 transposeTest = testCase "transposeTest" $ 
   assertEqual "" tMatrix (transpose mat)

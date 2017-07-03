@@ -43,9 +43,9 @@ instance (MatrixElement e) => Eq (Matrix e) where
 
 (<|>) :: MatrixElement e => Matrix e -> Matrix e -> Matrix e
 mtx1 <|> mtx2  = matrix (max n1 n2, m1+m2) (\(i,j) 
-    ->  if j < m1 
-    then (if i < n1 then mtx1 `at` (i,j) else 0)
-    else (if i < n2 then mtx2 `at` (i,j-m1) else 0))
+    ->  if j <= m1 
+    then (if i <= n1 then mtx1 `at` (i,j) else 0)
+    else (if i <= n2 then mtx2 `at` (i,j-m1) else 0))
         where 
           n1 = numRows mtx1
           n2 = numRows mtx2
@@ -54,9 +54,9 @@ mtx1 <|> mtx2  = matrix (max n1 n2, m1+m2) (\(i,j)
 
 (<->) :: MatrixElement e => Matrix e -> Matrix e -> Matrix e
 mtx1 <-> mtx2  = matrix (n1 + n2, max m1 m2) (\(i,j) 
-    ->  if i < n1 
-    then (if j < m1 then mtx1 `at` (i,j) else 0)
-    else (if j < m2 then mtx2 `at` (i-n1,j) else 0))
+    ->  if i <= n1 
+    then (if j <= m1 then mtx1 `at` (i,j) else 0)
+    else (if j <= m2 then mtx2 `at` (i-n1,j) else 0))
         where 
           n1 = numRows mtx1
           n2 = numRows mtx2
@@ -118,14 +118,25 @@ class (Num e, Eq e) => MatrixElement e where
   empty :: Matrix e
   empty = fromList []
   
-  minus :: Matrix e -> Matrix e -> Matrix e -- TODO
-  minus = undefined
+  minus :: Matrix e -> Matrix e -> Matrix e 
+  minus a b
+    | dimensions a == dimensions b = matrix (n,m) (\x -> (a `at` x) - (b `at` x))
+    | otherwise = error "Matrix diemnsions must agree"
+    where n = numRows a
+          m = numCols b
 
-  plus :: Matrix e -> Matrix e -> Matrix e -- TODO
-  plus = undefined
+  plus :: Matrix e -> Matrix e -> Matrix e 
+  plus a b
+    | dimensions a == dimensions b = matrix (n,m) (\x -> (a `at` x) + (b `at` x))
+    | otherwise = error "Matrix diemnsions must agree"
+    where n = numRows a
+          m = numCols b
 
-  times :: Matrix e -> Matrix e -> Matrix e -- TODO
-  times = undefined
+  times :: Matrix e -> Matrix e -> Matrix e 
+  times a b
+    | numCols a == numRows b
+      = matrix (numRows a, numCols b) (\(i,j) -> P.sum [(a`at`(i,x))*(b`at`(x,j)) | x <- [1..numCols a]])
+    | otherwise = error "Matrix dimensions must agree"
 
   inv :: Matrix e -> Maybe (Matrix e) -- TODO
   inv = undefined
@@ -137,7 +148,7 @@ class (Num e, Eq e) => MatrixElement e where
   transpose mat = matrix (m,n) (\(i,j) -> mat `at` (j,i))
     where (n,m) = dimensions mat
   
-  map :: MatrixElement f => (e -> f) -> Matrix e -> Matrix f
+  map :: MatrixElement d => (e -> d) -> Matrix e -> Matrix d
   map f mat = matrix (dimensions mat) (\x -> f (mat `at` x))
   
   foldMap :: Monoid m => (e->m) -> Matrix e -> m
@@ -149,4 +160,9 @@ class (Num e, Eq e) => MatrixElement e where
   sum = (\(Sum s) -> s) . foldMap Sum
 
 
-instance MatrixElement Int where 
+instance MatrixElement Int where
+instance MatrixElement Integer where
+instance MatrixElement Double where
+instance MatrixElement Float where
+-- instance MatrixElement Rational where
+
