@@ -53,10 +53,10 @@ expectedMat = Matrix (2,2) [[1,2],[3,4]]
 creatingMatrix = testCase "Creates a matrix" $ assertEqual [] expectedMat mat
 
 selectElementTest = testCase "Selecting Elements" $ 
-  assertEqual [] [1,3] (select (\ (i,j) -> i == 1) mat )
+  assertEqual [] [1,3] (select (\ (i,j) -> j == 1) mat )
 
 atTest = testCase "Testing the at function" $ 
-  assertEqual [] 4 (mat `at` (2,2))
+  assertEqual [] 2 (mat `at` (1,2))
 
 toListTest = testCase "toList Test" $
   assertEqual [] [[1,2],[3,4]] (toList mat)

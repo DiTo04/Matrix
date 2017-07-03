@@ -6,7 +6,7 @@ module Utility (Sum (..),
 
 getElement :: Int -> [a] -> Maybe a
 getElement _ [] = Nothing
-getElement 0 (x:xs) = Just x
+getElement 0 (x:_) = Just x
 getElement n xs
   | n < 0 = Nothing
   | otherwise = getElement (n-1) (tail xs)
@@ -19,11 +19,11 @@ getElementOrEmpty n = nothingToEmpty . (getElement n)
 
 nothingToZero :: Num a => Maybe a -> a
 nothingToZero (Just a) = a
-nothingToZero _ = 0
+nothingToZero (Nothing) = 0
 
 nothingToEmpty :: Num a => Maybe [a] -> [a]
-nothingToEmpty (Just [a]) = [a]
-nothingToEmpty _ = [] 
+nothingToEmpty (Just a) = a
+nothingToEmpty (Nothing) = [] 
 
 newtype Sum n = Sum n deriving (Show, Read)
 
