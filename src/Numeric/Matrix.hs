@@ -97,12 +97,12 @@ class (Num e, Eq e) => MatrixElement e where
   numCols :: Matrix e -> Int
   numCols = snd . dimensions
 
-  fromList :: [[e]] -> Matrix e -- TODO
+  fromList :: [[e]] -> Matrix e 
   fromList list = Matrix (n,m) list
     where n = length list
           m = length $ getElementOrEmpty 1 list
 
-  toList :: Matrix e -> [[e]] -- TODO
+  toList :: Matrix e -> [[e]]
   toList (Matrix (n,m) l) = l
 
   unit :: Int -> Matrix e
