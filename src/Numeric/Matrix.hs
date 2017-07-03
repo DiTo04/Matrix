@@ -1,6 +1,6 @@
 module Numeric.Matrix (
-  Matrix,
-  MatrixElement (..),
+  Matrix(..),
+  MatrixElement(..),
   (<|>),
   (<->),
   scale,
@@ -68,7 +68,8 @@ scale i = map (i *)
 
 
 class (Num e, Eq e) => MatrixElement e where
-  matrix :: (Int, Int) -> ((Int, Int) -> e) -> Matrix e
+  matrix :: (Int, Int) -> ((Int, Int) -> e) -> Matrix e 
+  matrix (n, m) f = Matrix (n,m) [[f (i,j) | j <- [1..m]] | i <- [1..n]]
 
   select :: ((Int, Int) -> Bool) -> Matrix e -> [e]
   select p m = [ m `at` (i,j) | i <- [1..numRows m]
@@ -76,7 +77,7 @@ class (Num e, Eq e) => MatrixElement e where
                             , p (i,j)]
 
   at :: Matrix e -> (Int, Int) -> e
-  at mat (i, j) = ((getElementOrZero j) . (getElementOrEmpty i) . toList) mat
+  at mat (i, j) = ((getElementOrZero (j-1)) . (getElementOrEmpty (i-1)) . toList) mat
   
   row :: Int -> Matrix e -> [e]
   row i = (getElementOrEmpty (i-1)) . toList
@@ -97,8 +98,13 @@ class (Num e, Eq e) => MatrixElement e where
   numCols = snd . dimensions
 
   fromList :: [[e]] -> Matrix e -- TODO
+  fromList list = Matrix (n,m) list
+    where n = length list
+          m = length $ getElementOrEmpty 1 list
+
   toList :: Matrix e -> [[e]] -- TODO
-  
+  toList (Matrix (n,m) l) = l
+
   unit :: Int -> Matrix e
   unit n = fromList [[if i == j then 1 else 0 | i <- [1..n]] | j <- [1..n]]
   
@@ -113,11 +119,20 @@ class (Num e, Eq e) => MatrixElement e where
   empty = fromList []
   
   minus :: Matrix e -> Matrix e -> Matrix e -- TODO
+  minus = undefined
+
   plus :: Matrix e -> Matrix e -> Matrix e -- TODO
+  plus = undefined
+
   times :: Matrix e -> Matrix e -> Matrix e -- TODO
+  times = undefined
+
   inv :: Matrix e -> Maybe (Matrix e) -- TODO
-  
+  inv = undefined
+
   det :: Matrix e -> e -- TODO
+  det = undefined
+  
   transpose :: Matrix e -> Matrix e
   transpose mat = matrix (m,n) (\(i,j) -> mat `at` (j,i))
     where (n,m) = dimensions mat
@@ -133,10 +148,5 @@ class (Num e, Eq e) => MatrixElement e where
   sum :: Matrix e -> e
   sum = (\(Sum s) -> s) . foldMap Sum
 
-main :: IO ()
-main = do
-  let 
-    n = getElementOrZero 2 [1,2,3]
-    m = getElementOrZero 4 [1,2,3]
-  print n
-  print m
+
+instance MatrixElement Int where 

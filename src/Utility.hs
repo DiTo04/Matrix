@@ -19,11 +19,11 @@ getElementOrEmpty n = nothingToEmpty . (getElement n)
 
 nothingToZero :: Num a => Maybe a -> a
 nothingToZero (Just a) = a
-nothingToZero (Nothing) = 0
+nothingToZero _ = 0
 
 nothingToEmpty :: Num a => Maybe [a] -> [a]
 nothingToEmpty (Just [a]) = [a]
-nothingToEmpty (Nothing) = [] :: [a]
+nothingToEmpty _ = [] 
 
 newtype Sum n = Sum n deriving (Show, Read)
 
