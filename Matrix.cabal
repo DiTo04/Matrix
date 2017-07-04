@@ -17,19 +17,28 @@ extra-source-files:  ChangeLog.md
 cabal-version:       >=1.10
 
 library
-  exposed-modules: Numeric.Matrix, Utility   
- -- other-modules: Utility       
+  exposed-modules: Numeric.Matrix 
+  other-modules: Utility       
   -- other-extensions:    
   build-depends:       base >=4.9 && <4.10
   hs-source-dirs:      src
   default-language:    Haskell2010
 
-Test-Suite tests
+Test-Suite MatrixTests
   type:             exitcode-stdio-1.0
-  hs-source-dirs:   tests
+  hs-source-dirs:   tests, src
   Main-is:          MatrixTests.hs
   default-language: Haskell2010
   Build-Depends:    base >= 3 && < 5
                   , tasty
                   , tasty-hunit
                   , Matrix
+
+Test-Suite UtilityTests
+  type:             exitcode-stdio-1.0
+  hs-source-dirs:   tests, src
+  Main-is:          UtilityTests.hs
+  default-language: Haskell2010
+  Build-Depends:    base >= 3 && < 5
+                  , tasty
+                  , tasty-hunit
