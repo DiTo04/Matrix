@@ -23,7 +23,8 @@ unitTests = testGroup "Unit tests for Matrix Module" [
   plusTest,
   timesTest,
  -- invTest,
- -- detTest,
+  detTest,
+  evilDetTest,
   transposeTest,
   mapTest,
   sumTest
@@ -87,6 +88,11 @@ plusTest = testCase "plus" $ assertEqual "" mat (a+b)
         b = fromList [[1,1],[1,1]] :: Matrix Int
   
 timesTest = testCase "times" $ assertEqual "" mat (mat * (unit 2))
+
+detTest = testCase "determinent" $ assertEqual "" 1 (det $ (unit 2 :: Matrix Int))
+
+evilDetTest = testCase  "Evil determinent evaluation" $ 
+  assertEqual "" (1*5*9 + 2*6*7 + (-3)*4*8 - 1*6*8 - 2*4*9 - (-3)*5*7) $  det $ (Matrix (3,3) [[1,2,-3],[4,5,6],[7,8,9]] :: Matrix Int)
 
 transposeTest = testCase "transposeTest" $ 
   assertEqual "" tMatrix (transpose mat)

@@ -141,8 +141,19 @@ class (Num e, Eq e) => MatrixElement e where
   inv :: Matrix e -> Maybe (Matrix e) -- TODO
   inv = undefined
 
-  det :: Matrix e -> e -- TODO
-  det = undefined
+  det :: Matrix e -> e 
+  det mat@(Matrix (n,m) _) 
+    | n == m && n>2    = P.sum $ zipWith (\c i -> c * (det $ removeRowCol 1 i mat)) coef intList
+    | n == m && n == 2 = (mat `at` (1,1)) * (mat `at` (2,2)) - ((mat `at` (1,2)) * (mat `at` (2,1)))
+    | otherwise        = 0
+    where
+      coef = zipWith (*) (row 1 mat) (cycle [1,-1])
+      intList = 1 : P.map (+1) intList :: [Int]
+
+
+  removeRowCol :: Int -> Int -> Matrix e -> Matrix e
+  removeRowCol i j mat@(Matrix (n,m) _) = Matrix (n-1,m-1) $ chunksOf (n-1) elements 
+    where elements = select (\(x,y) -> (i /= x) && (j /= y)) mat
   
   transpose :: Matrix e -> Matrix e
   transpose mat = matrix (m,n) (\(i,j) -> mat `at` (j,i))
