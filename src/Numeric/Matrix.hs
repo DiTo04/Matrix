@@ -173,5 +173,4 @@ instance MatrixElement Int where
 instance MatrixElement Integer where
 instance MatrixElement Double where
 instance MatrixElement Float where
--- instance MatrixElement Rational where
 
